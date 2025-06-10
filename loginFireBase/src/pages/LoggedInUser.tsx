@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import Card from "../components/Card";
 import { useFirebaseUser } from "../hooks/useFirebaseUser";
+import { AccountLinkingModal } from "../components/AccountLinkingModal";
 
 export const LoggedInUser = () => {
-  const navigate = useNavigate();
-  const { user, logout, linkWithGoogle, linkWithFacebook, error } = useFirebaseUser();
+  const { user, logout, linkWithGoogle, linkWithFacebook, linkWithPassword, error, isLoading, existingEmail, pendingCredential, clearError } = useFirebaseUser();
   const [userHasGoogle, setUserHasGoogle] = useState(false);
   const [userHasFacebook, setUserHasFacebook] = useState(false);
   const [userHasPassword, setUserHasPassword] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -19,7 +19,13 @@ export const LoggedInUser = () => {
   }, [user]);
 
   const onAddEmailSignInClicked = () => {
-    navigate("/linkpassword");
+    setShowLinkModal(true);
+  };
+
+  const handleLinkAccount = async (password: string) => {
+    if (!user) return;
+    await linkWithPassword(user.email || "", password);
+    setShowLinkModal(false);
   };
 
   return (
@@ -34,14 +40,14 @@ export const LoggedInUser = () => {
           Add additional login methods:
           {!userHasGoogle && (
             <div>
-              <Button variant="danger" className="mt-3" onClick={linkWithGoogle}>
+              <Button variant="google" className="mt-3" onClick={linkWithGoogle} isLoading={isLoading}>
                 Add Google Sign In
               </Button>
             </div>
           )}
           {!userHasFacebook && (
             <div>
-              <Button variant="danger" className="mt-3" onClick={linkWithFacebook}>
+              <Button variant="facebook" className="mt-3" onClick={linkWithFacebook} isLoading={isLoading}>
                 Add Facebook Sign In
               </Button>
             </div>
@@ -52,6 +58,7 @@ export const LoggedInUser = () => {
                 variant="secondary"
                 className="mt-3"
                 onClick={onAddEmailSignInClicked}
+                disabled={isLoading}
               >
                 Add Email Sign In
               </Button>
@@ -60,10 +67,30 @@ export const LoggedInUser = () => {
         </div>
       </div>
       <div>
-        <Button variant="primary" className="mt-3" onClick={logout}>
+        <Button variant="primary" className="mt-3" onClick={logout} isLoading={isLoading}>
           Logout
         </Button>
       </div>
+
+      {showLinkModal && user && (
+        <AccountLinkingModal
+          email={user.email || ""}
+          onLinkAccount={handleLinkAccount}
+          onCancel={() => setShowLinkModal(false)}
+          isLoading={isLoading}
+        />
+      )}
+      {existingEmail && pendingCredential && (
+        <AccountLinkingModal
+          email={existingEmail}
+          onLinkAccount={async (password) => {
+            await linkWithPassword(existingEmail, password);
+            clearError();
+          }}
+          onCancel={clearError}
+          isLoading={isLoading}
+        />
+      )}
     </Card>
   );
 };

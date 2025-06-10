@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  linkWithPopup,
   GoogleAuthProvider,
   FacebookAuthProvider,
   signOut,
@@ -75,7 +76,6 @@ export const useFirebaseUser = () => {
         if (email) {
           setExistingEmail(email);
           setPendingCredential(err.credential);
-          
           const signInMethods = await fetchSignInMethodsForEmail(auth, email);
           setError(`Ya existe una cuenta con ${email}. Métodos disponibles: ${signInMethods.join(", ")}. ¿Quieres vincular las cuentas?`);
         } else {
@@ -106,7 +106,6 @@ export const useFirebaseUser = () => {
   const loginWithFacebook = () =>
     executeAuthAction(() => signInWithPopup(auth, new FacebookAuthProvider()));
 
-  
   const linkWithPassword = (email: string, password: string) =>
     executeAuthAction(async () => {
       if (!user) throw new Error("No user logged in");
@@ -118,14 +117,14 @@ export const useFirebaseUser = () => {
     executeAuthAction(async () => {
       if (!user) throw new Error("No user logged in");
       const provider = new GoogleAuthProvider();
-      return await signInWithPopup(auth, provider);
+      return await linkWithPopup(user, provider);
     });
 
   const linkWithFacebook = () =>
     executeAuthAction(async () => {
       if (!user) throw new Error("No user logged in");
       const provider = new FacebookAuthProvider();
-      return await signInWithPopup(auth, provider);
+      return await linkWithPopup(user, provider);
     });
 
   const linkExistingAccount = async (password?: string) => {

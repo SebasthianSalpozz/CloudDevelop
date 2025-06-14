@@ -16,6 +16,8 @@ import {
   fetchSignInMethodsForEmail,
   type User,
 } from "firebase/auth";
+import {db} from "../firebase/firebaseConfig";
+import { doc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 
 const getFriendlyErrorMessage = (errorCode: string): string => {
   switch (errorCode) {
@@ -92,11 +94,31 @@ export const useFirebaseUser = () => {
 
   const loginWithFirebase = (email: string, password: string) =>
     executeAuthAction(() => signInWithEmailAndPassword(auth, email, password));
-
-  const registerWithFirebase = (email: string, password: string, fullname: string) =>
+  const registerWithFirebase = (
+    email: string,
+    password: string,
+    fullname: string,
+    address: string = "",
+    birthdate: Date | null = null
+  ) =>
     executeAuthAction(async () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: fullname });
+      const user = userCredential.user;
+
+      await updateProfile(user, { displayName: fullname });
+
+      const age = birthdate
+        ? Math.floor((Date.now() - birthdate.getTime()) / (365.25 * 24 * 3600 * 1000))
+        : null;
+      
+        await setDoc(doc(db, "UserInformation", user.uid), {
+        fullName: fullname,
+        address,
+        birthdate: birthdate ? birthdate.toISOString() : null,
+        age,
+        createdAt: serverTimestamp(),
+      });
+
       return userCredential;
     });
 
@@ -132,7 +154,6 @@ export const useFirebaseUser = () => {
       setError("No hay información de cuenta pendiente para vincular");
       return;
     }
-
     return executeAuthAction(async () => {
       if (password) {
         const userCredential = await signInWithEmailAndPassword(auth, existingEmail, password);
@@ -143,6 +164,32 @@ export const useFirebaseUser = () => {
       }
     });
   };
+
+  const updateUserProfile = async (
+    uid: string,
+    data: { address?: string; birthdate?: Date; fullName?: string }
+  ) => {
+    const docRef = doc(db, "UserInformation", uid);
+    const payload: any = {};
+
+    if (data.address !== undefined) {
+      payload.address = data.address;
+    }
+    if (data.birthdate !== undefined) {
+      payload.birthdate = data.birthdate.toISOString();
+      payload.age = Math.floor(
+        (Date.now() - data.birthdate.getTime()) / (365.25 * 24 * 3600 * 1000)
+      );
+    }
+    if (data.fullName !== undefined) {
+      payload.fullName = data.fullName;
+      await updateProfile(auth.currentUser!, { displayName: data.fullName });
+    }
+
+    // Usamos setDoc con merge: true para crear o actualizar
+    await setDoc(docRef, payload, { merge: true });
+  };
+
 
   const logout = () => executeAuthAction(() => signOut(auth));
 
@@ -160,6 +207,7 @@ export const useFirebaseUser = () => {
     linkWithGoogle,
     linkWithFacebook,
     linkExistingAccount,
+    updateUserProfile,
     logout,
     clearError,
   };

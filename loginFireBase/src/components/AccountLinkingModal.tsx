@@ -83,4 +83,4 @@ export const AccountLinkingModal: React.FC<AccountLinkingModalProps> = ({
       </div>
     </div>
   );
-};
+}

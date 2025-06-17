@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { List } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
+import { useFirebaseUser } from "../hooks/useFirebaseUser";
 
 const Menu = () => {
+  const { user, logout } = useFirebaseUser();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -24,12 +26,25 @@ const Menu = () => {
             <Link to="/" className="hover:text-gray-300">
               Home
             </Link>
-            <Link to="/login" className="hover:text-gray-300">
-              Login
-            </Link>
-            <Link to="/register" className="hover:text-gray-300">
-              Register
-            </Link>
+            {user ? (
+              <>
+                <Link to="/posts" className="hover:text-gray-300">
+                  Posts
+                </Link>
+                <button onClick={logout} className="hover:text-gray-300">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="hover:text-gray-300">
+                  Login
+                </Link>
+                <Link to="/register" className="hover:text-gray-300">
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -39,12 +54,25 @@ const Menu = () => {
           <Link to="/" className="block text-gray-300 hover:text-white">
             Home
           </Link>
-          <Link to="/login" className="block text-gray-300 hover:text-white">
-            Login
-          </Link>
-          <Link to="/register" className="block text-gray-300 hover:text-white">
-            Register
-          </Link>
+          {user ? (
+            <>
+              <Link to="/posts" className="block text-gray-300 hover:text-white">
+                Posts
+              </Link>
+              <button onClick={logout} className="block text-gray-300 hover:text-white">
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="block text-gray-300 hover:text-white">
+                Login
+              </Link>
+              <Link to="/register" className="block text-gray-300 hover:text-white">
+                Register
+              </Link>
+            </>
+          )}
         </div>
       )}
     </nav>

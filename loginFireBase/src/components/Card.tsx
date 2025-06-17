@@ -17,7 +17,7 @@ const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white border border-gray-200 rounded-lg shadow-sm p-4 ${className}`}
+      className={`bg-white border border-gray-200 rounded-lg shadow-sm p-4 max-w-full ${className}`}
     >
       {(title || subtitle) && (
         <div className="mb-3">
@@ -27,7 +27,7 @@ const Card: React.FC<CardProps> = ({
           {subtitle && <h6 className="text-sm text-gray-500">{subtitle}</h6>}
         </div>
       )}
-      <div className="text-gray-700 mb-3">{children}</div>
+      <div className="text-gray-700 mb-3 overflow-hidden">{children}</div>
       {footer && (
         <div className="pt-3 border-t border-gray-200 text-sm text-gray-600">
           {footer}

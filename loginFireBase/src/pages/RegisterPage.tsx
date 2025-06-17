@@ -80,7 +80,6 @@ export const RegisterPage = () => {
                 },
               })}
             />
-            {/* NUEVOS CAMPOS */}
             <Input
               id="address"
               label="Dirección"
@@ -95,7 +94,6 @@ export const RegisterPage = () => {
               error={errors.birthdate?.message}
               {...register("birthdate")}
             />
-            {/* FIN NUEVOS CAMPOS */}
             <Button
               variant="primary"
               type="submit"

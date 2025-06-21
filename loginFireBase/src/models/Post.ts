@@ -6,6 +6,7 @@ export interface Post {
   content: string;
   createdAt: Date;
   ownerId: string;
+  imageUrl?: string;
 }
 
 export class Post {
@@ -16,6 +17,7 @@ export class Post {
       content: data.content || "",
       createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
       ownerId: data.ownerId || "",
+      imageUrl: data.imageUrl || "",
     };
   }
 
@@ -25,6 +27,7 @@ export class Post {
       content: post.content,
       createdAt: post.createdAt,
       ownerId: post.ownerId,
+      imageUrl: post.imageUrl || "",
     };
   }
 }

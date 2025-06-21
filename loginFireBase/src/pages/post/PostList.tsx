@@ -43,6 +43,16 @@ export const PostList: React.FC<PostListProps> = ({ onEdit, onReload }) => {
     <div className="space-y-4">
       {posts.map((post) => (
         <Card key={post.id} title={post.title} className="break-words">
+          {post.imageUrl && (
+            <div className="mb-3 flex justify-center">
+              <img
+                src={post.imageUrl}
+                alt="Post"
+                className="mb-3 max-h-64 rounded border"
+              /> 
+            </div>
+            
+          )}
           <p className="whitespace-pre-wrap">{post.content}</p>
           <p className="text-sm text-gray-500 mt-2">
             Creado el: {post.createdAt.toLocaleDateString()}
